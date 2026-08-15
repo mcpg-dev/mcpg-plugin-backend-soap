@@ -1,0 +1,20 @@
+schema: mcpg.dev/plugin/v1
+id: dev.mcpg.backend.soap
+name: SOAP Binding
+license: BUSL-1.1
+description: |
+  Dispatches tool calls as SOAP 1.1 / 1.2 envelopes over outbound HTTP.
+  Each binding declares an endpoint, a SOAPAction, and an XML body
+  template; tool-call arguments are CEL-interpolated (and XML-escaped)
+  into the `<soap:Body>` before the envelope is POSTed. Async via
+  reqwest; the DNS rebinding guard rejects private/loopback resolved
+  addresses unless explicitly opted in. SOAP Faults (HTTP 500 carrying a
+  `<soap:Fault>`) are parsed into a structured downstream error rather
+  than surfaced as a transport failure. Per-caller `cred://` references
+  in the endpoint + HTTP headers resolve through the gateway's
+  credential cache at dispatch time, with an internal ClientRegistry
+  caching one `reqwest::Client` per resolved-credential digest.
+class: backend
+runtime: native-cdylib-v1
+protocol_version: "1.0"
+required_capabilities: [network_outbound]

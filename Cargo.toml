@@ -1,0 +1,64 @@
+[package]
+name = "mcpg-plugin-backend-soap"
+version = "0.1.0-alpha.15"
+license = "BUSL-1.1"
+edition = "2024"
+description = """
+SOAP backend binding plugin for mcpg. Dispatches tool calls as SOAP
+1.1 / 1.2 envelopes over outbound HTTP via reqwest, with per-binding
+endpoint + SOAPAction + XML body template, CEL templating of the
+envelope, DNS rebinding protection, SOAP Fault parsing, structured
+response envelopes, and per-caller `cred://` resolution. Reuses the
+shared `net-core` HTTP-over-reqwest core (per-cred ClientRegistry +
+SSRF guard) exactly like the http / grpc / graphql backends; the main
+mcpg binary loads it at runtime via the plugin registry and carries no
+inline SOAP dispatch code.
+"""
+
+[lib]
+# cdylib: the .so the gateway's native_loader dlopens. rlib: in-tree
+# unit tests + the eager new() constructor (used by tests + the
+# static-firstparty path).
+crate-type = ["cdylib", "rlib"]
+
+[features]
+# Default OFF so the workspace build does not emit `mcpg_plugin_register`
+# from the rlib and collide with the other plugin rlibs. Standalone
+# cdylib builds (nx docker:build / OCI publish) opt in.
+default = []
+cdylib-export = []
+# Declared empty so the SDK macro's `register_static` accessor
+# (`#[cfg(feature = "static-firstparty")]`) does not trip
+# `unexpected_cfgs`. soap is consumed as a cdylib.
+static-firstparty = []
+
+[dependencies]
+mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13" }
+# Shared HTTP-over-reqwest core (per-cred client cache, DNS-rebinding
+# guard, body-limit reader, downstream-error retry shaping). http / grpc
+# / graphql link the same crate so the SSRF guard lives in one place;
+# SOAP is XML-over-HTTP, so it reuses the transport unchanged and adds
+# only envelope construction + Fault parsing on top.
+mcpg-plugin-backend-net-core = { git = "https://github.com/mcpg-dev/mcpg-plugin-backend-net-core", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13" }
+mcpg-expr            = { git = "https://github.com/mcpg-dev/mcpg-expr", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13" }
+# Unified HostHandle surface (span / metric / audit). The plugin
+# stores a `HostHandle` on `Self` and routes per-call observability
+# through it. Mirrors the http / sql backend wiring.
+mcpg-plugin-sdk      = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13", features = ["static-firstparty"] }
+mcpg-plugin-host     = { git = "https://github.com/mcpg-dev/mcpg-plugin-host", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13" }
+async-trait    = "0.1"
+chrono         = { version = "0.4", features = ["clock"] }
+# SOAP envelope construction + response/Fault parsing. MIT-licensed,
+# already on the deny.toml allowlist. The only XML dependency in the
+# workspace.
+quick-xml      = "0.39"
+reqwest        = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+serde          = { version = "1", features = ["derive"] }
+serde_json     = "1"
+tokio          = { version = "1", features = ["sync", "rt", "rt-multi-thread", "macros", "time"] }
+tracing        = "0.1"
+url            = "2"
+
+[dev-dependencies]
+tokio    = { version = "1", features = ["macros", "rt", "rt-multi-thread", "net", "io-util", "time"] }
+wiremock = "0.6"
