@@ -1,6 +1,6 @@
 [package]
 name = "mcpg-plugin-backend-soap"
-version = "0.1.0-alpha.17"
+version = "0.1.0-alpha.18"
 license = "BUSL-1.1"
 edition = "2024"
 description = """
@@ -33,19 +33,19 @@ cdylib-export = []
 static-firstparty = []
 
 [dependencies]
-mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.15", version = "=0.1.0-beta.15" }
+mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.16", version = "=0.1.0-beta.16" }
 # Shared HTTP-over-reqwest core (per-cred client cache, DNS-rebinding
 # guard, body-limit reader, downstream-error retry shaping). http / grpc
 # / graphql link the same crate so the SSRF guard lives in one place;
 # SOAP is XML-over-HTTP, so it reuses the transport unchanged and adds
 # only envelope construction + Fault parsing on top.
-mcpg-plugin-backend-net-core = { git = "https://github.com/mcpg-dev/mcpg-plugin-backend-net-core", tag = "v0.1.0-beta.15", version = "=0.1.0-beta.15" }
-mcpg-expr            = { git = "https://github.com/mcpg-dev/mcpg-expr", tag = "v0.1.0-beta.15", version = "=0.1.0-beta.15" }
+mcpg-plugin-backend-net-core = { git = "https://github.com/mcpg-dev/mcpg-plugin-backend-net-core", tag = "v0.1.0-beta.16", version = "=0.1.0-beta.16" }
+mcpg-expr            = { git = "https://github.com/mcpg-dev/mcpg-expr", tag = "v0.1.0-beta.16", version = "=0.1.0-beta.16" }
 # Unified HostHandle surface (span / metric / audit). The plugin
 # stores a `HostHandle` on `Self` and routes per-call observability
 # through it. Mirrors the http / sql backend wiring.
-mcpg-plugin-sdk      = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.15", version = "=0.1.0-beta.15", features = ["static-firstparty"] }
-mcpg-plugin-host     = { git = "https://github.com/mcpg-dev/mcpg-plugin-host", tag = "v0.1.0-beta.16", version = "=0.1.0-beta.16" }
+mcpg-plugin-sdk      = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.16", version = "=0.1.0-beta.16", features = ["static-firstparty"] }
+mcpg-plugin-host     = { git = "https://github.com/mcpg-dev/mcpg-plugin-host", tag = "v0.1.0-beta.17", version = "=0.1.0-beta.17" }
 async-trait    = "0.1"
 chrono         = { version = "0.4", features = ["clock"] }
 # SOAP envelope construction + response/Fault parsing. MIT-licensed,
