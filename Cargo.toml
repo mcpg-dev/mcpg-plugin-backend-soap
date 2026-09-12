@@ -1,6 +1,6 @@
 [package]
 name = "mcpg-plugin-backend-soap"
-version = "0.1.0-alpha.27"
+version = "0.1.0-alpha.28"
 license = "BUSL-1.1"
 edition = "2024"
 description = """
@@ -39,8 +39,8 @@ mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol
 # / graphql link the same crate so the SSRF guard lives in one place;
 # SOAP is XML-over-HTTP, so it reuses the transport unchanged and adds
 # only envelope construction + Fault parsing on top.
-mcpg-plugin-backend-net-core = { git = "https://github.com/mcpg-dev/mcpg-plugin-backend-net-core", tag = "v0.1.0-beta.24", version = "=0.1.0-beta.24" }
-mcpg-expr            = { git = "https://github.com/mcpg-dev/mcpg-expr", tag = "v0.1.0-beta.23", version = "=0.1.0-beta.23" }
+mcpg-plugin-backend-net-core = { git = "https://github.com/mcpg-dev/mcpg-plugin-backend-net-core", tag = "v0.1.0-beta.25", version = "=0.1.0-beta.25" }
+mcpg-expr            = { git = "https://github.com/mcpg-dev/mcpg-expr", tag = "v0.1.0-beta.24", version = "=0.1.0-beta.24" }
 # Unified HostHandle surface (span / metric / audit). The plugin
 # stores a `HostHandle` on `Self` and routes per-call observability
 # through it. Mirrors the http / sql backend wiring.
