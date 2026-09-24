@@ -25,7 +25,7 @@ use crate::types::SoapVersion;
 /// key derivation (so `tns:GetWeatherResponse` keys as
 /// `GetWeatherResponse`).
 fn qname_local(name: QName<'_>) -> String {
-    String::from_utf8_lossy(name.local_name().as_ref()).into_owned()
+    name.local_name().as_ref().to_owned()
 }
 
 /// Recursively XML-escape every string leaf of a JSON value, leaving
@@ -143,7 +143,9 @@ pub fn parse_fault(body: &str, _version: SoapVersion) -> Option<SoapFault> {
             }
             Ok(Event::Text(t)) => {
                 if let Some(depth) = fault_depth {
-                    let text = t.xml_content().map(|c| c.into_owned()).unwrap_or_default();
+                    let text = t
+                        .xml_content(quick_xml::XmlVersion::Implicit1_0)
+                        .into_owned();
                     if in_detail {
                         detail_buf.push_str(&text);
                     } else if !text.trim().is_empty() {
@@ -283,7 +285,7 @@ fn read_element(reader: &mut Reader<&[u8]>, start: &BytesStart<'_>) -> Result<Va
         let attr = attr.map_err(|e| e.to_string())?;
         let key = qname_local(attr.key);
         let val = attr
-            .unescape_value()
+            .normalized_value(quick_xml::XmlVersion::Implicit1_0)
             .map_err(|e| e.to_string())?
             .into_owned();
         obj.insert(format!("@{key}"), Value::String(val));
@@ -305,11 +307,11 @@ fn read_element(reader: &mut Reader<&[u8]>, start: &BytesStart<'_>) -> Result<Va
                 children.push((name, child));
             }
             Event::Text(t) => {
-                let chunk = t.xml_content().map_err(|e| e.to_string())?;
+                let chunk = t.xml_content(quick_xml::XmlVersion::Implicit1_0);
                 text.push_str(chunk.as_ref());
             }
             Event::CData(t) => {
-                text.push_str(t.decode().map_err(|e| e.to_string())?.as_ref());
+                text.push_str(t.into_inner().as_ref());
             }
             Event::End(_) => break,
             Event::Eof => return Err("unexpected EOF inside XML element".to_owned()),
@@ -347,7 +349,7 @@ fn empty_element_value(e: &BytesStart<'_>) -> Result<Value, String> {
         let attr = attr.map_err(|x| x.to_string())?;
         let key = qname_local(attr.key);
         let val = attr
-            .unescape_value()
+            .normalized_value(quick_xml::XmlVersion::Implicit1_0)
             .map_err(|x| x.to_string())?
             .into_owned();
         obj.insert(format!("@{key}"), Value::String(val));
