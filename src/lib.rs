@@ -1055,6 +1055,7 @@ mod tests {
             session_id: None,
             identity: None,
             idempotency: None,
+            client: None,
         };
         let err = plugin.execute("missing", req).await.expect_err("missing");
         assert!(matches!(err, BackendError::ProfileNotFound { .. }));
@@ -1074,6 +1075,7 @@ mod tests {
             session_id: None,
             identity: None,
             idempotency: None,
+            client: None,
         };
         let err = plugin
             .execute("weather", req)
